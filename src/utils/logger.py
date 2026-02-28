@@ -59,7 +59,7 @@ class MetricsTracker:
 
     def __init__(self, state_file: str = "data/dashboard_state.json"):
         self.state_file = state_file
-        self._state: Dict[str, Any] = {
+        _default: Dict[str, Any] = {
             "history": {"loss_G": [], "loss_D": [], "evasion_rate": []},
             "ids_metrics": {},
             "recent_alerts": [],
@@ -68,6 +68,15 @@ class MetricsTracker:
             "attacks_detected": 0,
         }
         os.makedirs("data", exist_ok=True)
+        # Load existing state so detect.py doesn't overwrite training results
+        if os.path.exists(state_file):
+            try:
+                with open(state_file) as f:
+                    loaded = json.load(f)
+                _default.update(loaded)
+            except Exception:
+                pass
+        self._state = _default
 
     def update_gan(self, loss_G: float, loss_D: float, evasion: float) -> None:
         self._state["history"]["loss_G"].append(round(loss_G, 5))
