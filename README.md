@@ -70,6 +70,7 @@ The result is an IDS that has been battle-tested against its own adversary, maki
 | 🛡️ **Residual IDS** | Deep residual network as Discriminator — doubles as production IDS |
 | 🌲 **Ensemble Mode** | Neural IDS + Random Forest + Gradient Boosting soft-voting |
 | 📊 **Live Dashboard** | Plotly Dash dashboard — evasion rate, metrics, attack distribution, alerts |
+| 🌐 **Live Packet Stream** | `detect.py` simulates a real-time packet feed — model inference on every packet |
 | 🔄 **Adversarial Training** | Phase 2 hardens IDS by training on its own adversarial weaknesses |
 | 🐳 **Docker Ready** | One command deployment with `docker-compose up` |
 | ✅ **CI/CD** | GitHub Actions: lint + tests + Docker build on every push |
@@ -96,6 +97,7 @@ neuralsentinel-ids/
 │   └── config.yaml              # All hyperparameters in one place
 ├── tests/                       # pytest unit tests
 ├── train.py                     # Main training entry point
+├── detect.py                    # Live packet stream — real-time IDS inference
 ├── evaluate.py                  # Evaluation + report generation
 ├── Dockerfile
 └── docker-compose.yml
@@ -123,11 +125,24 @@ python train.py
 ### 3. Launch Dashboard
 
 ```bash
-python src/dashboard/app.py
+python -m src.dashboard.app
 # Open http://localhost:8050
 ```
 
-### 4. Evaluate
+### 4. Stream Live Detections
+
+Open a **third terminal** while training + dashboard are running:
+
+```bash
+# Run model inference on every packet in real time
+python detect.py --loop --speed 0.05
+```
+
+This feeds NSL-KDD test packets through the trained IDS one by one, updating **Total Packets Analyzed**, **Attacks Detected**, and the **Live Alerts** table on the dashboard in real time.
+
+> 💡 Run training → dashboard → detect simultaneously for the full live experience.
+
+### 5. Evaluate
 
 ```bash
 python evaluate.py --report-dir reports/
@@ -183,14 +198,18 @@ All hyperparameters live in `config/config.yaml`:
 ```yaml
 gan:
   latent_dim: 64
-  epochs: 100
-  n_critic: 5         # Discriminator:Generator update ratio
+  epochs: 30          # Increase for stronger GAN (CPU: 30, GPU: 100+)
+  n_critic: 2         # Discriminator:Generator update ratio
   lambda_gp: 10.0     # Gradient penalty strength
 
 ids:
   hidden_dims: [256, 128, 64, 32]
   dropout: 0.3
   neural_weight: 0.5  # Ensemble weight for neural component
+
+training:
+  harden_epochs: 10   # Phase 2 adversarial hardening epochs
+  n_adversarial: 2000 # Adversarial samples injected per hardening round
 ```
 
 ---
