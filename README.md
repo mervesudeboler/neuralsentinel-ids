@@ -15,7 +15,7 @@
 
 <br>
 
-> 🟢 **Demo Mode** — Dashboard running with pre-loaded simulated training results
+> 🟢 **Demo Mode** — Dashboard running with pre-loaded results (before training)
 
 ![NeuralSentinel Demo Dashboard](assets/demo.jpeg)
 
@@ -32,6 +32,10 @@
 <br>
 
 ![NeuralSentinel Live 3](assets/ss3.jpeg)
+
+<br>
+
+![NeuralSentinel Live 4](assets/ss4.jpeg)
 
 </div>
 
@@ -181,13 +185,13 @@ python train.py --phase harden
 
 ## 📈 Results (NSL-KDD)
 
-| Model | F1 (weighted) | ROC-AUC | Evasion Rate (before) | Evasion Rate (after) |
+| Model | F1 (weighted) | ROC-AUC | Evasion Rate (before hardening) | Evasion Rate (after hardening) |
 |---|---|---|---|---|
-| Random Forest baseline | 0.9710 | 0.9650 | — | — |
-| NeuralIDS (pre-hardening) | 0.9780 | 0.9820 | ~42% | — |
-| **NeuralIDS (post-hardening)** | **0.9830** | **0.9870** | — | **~8%** |
+| NeuralIDS (pre-hardening) | 0.8109 | 0.8319 | ~83% | — |
+| **NeuralIDS (post-hardening)** | **0.8109** | **0.8319** | — | **6.15%** |
 
-> Adversarial Training reduced GAN evasion rate from ~42% → ~8% while *improving* detection performance.
+> Adversarial Training reduced GAN evasion rate from ~83% → **6.15%** after hardening on 8,000 adversarial samples.
+> Trained on NSL-KDD dataset · 30 pre-training epochs · 20 GAN epochs · 30 hardening epochs
 
 ---
 
@@ -198,18 +202,19 @@ All hyperparameters live in `config/config.yaml`:
 ```yaml
 gan:
   latent_dim: 64
-  epochs: 30          # Increase for stronger GAN (CPU: 30, GPU: 100+)
-  n_critic: 2         # Discriminator:Generator update ratio
-  lambda_gp: 10.0     # Gradient penalty strength
-
-ids:
-  hidden_dims: [256, 128, 64, 32]
-  dropout: 0.3
-  neural_weight: 0.5  # Ensemble weight for neural component
+  generator_dims: [128, 256, 128]
+  use_attention: true
+  epochs: 20           # GAN training epochs
+  n_critic: 4          # Discriminator:Generator update ratio (WGAN-GP: 4-5)
+  lambda_gp: 10.0      # Gradient penalty strength
+  lr_g: 0.00005        # Generator learning rate (keep low for stability)
+  lr_d: 0.0004         # Discriminator learning rate
 
 training:
-  harden_epochs: 10   # Phase 2 adversarial hardening epochs
-  n_adversarial: 2000 # Adversarial samples injected per hardening round
+  pretrain_epochs: 30  # IDS pre-training before GAN (crucial for good baseline)
+  harden_epochs: 30    # Phase 2 adversarial hardening epochs
+  n_adversarial: 8000  # Adversarial samples injected per hardening round
+  batch_size: 256
 ```
 
 ---
