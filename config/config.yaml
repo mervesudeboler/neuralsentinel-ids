@@ -28,9 +28,9 @@ training:
   checkpoint_dir: "checkpoints"
   pretrain_epochs: 30    # IDS önce güçlü classifier olarak eğitilir
   pretrain_lr: 0.001
-  harden_epochs: 15      # 10→15: daha iyi adversarial robustness
-  batch_size: 512
-  n_adversarial: 2000
+  harden_epochs: 30      # daha güçlü hardening
+  batch_size: 256
+  n_adversarial: 8000    # çok daha fazla adversarial örnek
 
 dashboard:
   state_file: "data/dashboard_state.json"

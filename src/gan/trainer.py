@@ -193,7 +193,7 @@ class AdversarialTrainer:
         loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=True)
         criterion = nn.BCEWithLogitsLoss()
 
-        self.opt_D = optim.Adam(self.D.parameters(), lr=5e-5, betas=(0.9, 0.999))
+        self.opt_D = optim.Adam(self.D.parameters(), lr=2e-4, betas=(0.9, 0.999))
 
         for epoch in range(1, epochs + 1):
             self.D.train()
