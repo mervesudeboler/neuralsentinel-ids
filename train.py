@@ -13,8 +13,14 @@ import argparse
 import os
 import sys
 import torch
+import torch.nn as nn
 import yaml
 import numpy as np
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.metrics import (
+    f1_score, roc_auc_score, accuracy_score,
+    precision_score, recall_score, confusion_matrix,
+)
 
 from src.data.preprocessor import NSLKDDPreprocessor
 from src.ids.models import NeuralIDS, EnsembleIDS
@@ -91,8 +97,6 @@ def main():
 
     # ── Pre-train IDS as binary classifier ───────────────────────────────────
     logger.info("Pre-training IDS as binary classifier …")
-    import torch.nn as nn
-    from torch.utils.data import DataLoader, TensorDataset
     pretrain_dataset = TensorDataset(
         torch.tensor(X_train, dtype=torch.float32),
         torch.tensor(y_train, dtype=torch.float32),
@@ -167,10 +171,6 @@ def main():
         X_t = torch.tensor(X_test, dtype=torch.float32).to(device)
         with torch.no_grad():
             preds = neural_ids.predict(X_t).cpu().numpy()
-        from sklearn.metrics import (
-            f1_score, roc_auc_score, accuracy_score,
-            precision_score, recall_score, confusion_matrix
-        )
         f1  = f1_score(y_test, preds, average="weighted")
         auc = roc_auc_score(y_test, preds)
         acc = accuracy_score(y_test, preds)
