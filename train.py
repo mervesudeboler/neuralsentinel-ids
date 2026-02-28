@@ -139,10 +139,24 @@ def main():
         X_t = torch.tensor(X_test, dtype=torch.float32).to(device)
         with torch.no_grad():
             preds = neural_ids.predict(X_t).cpu().numpy()
-        from sklearn.metrics import f1_score, roc_auc_score
-        f1 = f1_score(y_test, preds, average="weighted")
+        from sklearn.metrics import (
+            f1_score, roc_auc_score, accuracy_score,
+            precision_score, recall_score, confusion_matrix
+        )
+        f1  = f1_score(y_test, preds, average="weighted")
         auc = roc_auc_score(y_test, preds)
-        hardened_metrics = {"f1_weighted": round(f1, 4), "roc_auc": round(auc, 4)}
+        acc = accuracy_score(y_test, preds)
+        pre = precision_score(y_test, preds, average="weighted", zero_division=0)
+        rec = recall_score(y_test, preds, average="weighted", zero_division=0)
+        cm  = confusion_matrix(y_test, preds).tolist()
+        hardened_metrics = {
+            "f1_weighted": round(f1,  4),
+            "roc_auc":     round(auc, 4),
+            "accuracy":    round(acc, 4),
+            "precision":   round(pre, 4),
+            "recall":      round(rec, 4),
+            "confusion_matrix": cm,
+        }
         logger.info(f"Hardened IDS metrics: {hardened_metrics}")
         tracker.update_ids_metrics(hardened_metrics)
 
