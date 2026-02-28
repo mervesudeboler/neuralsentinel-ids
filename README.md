@@ -119,6 +119,8 @@ cd neuralsentinel-ids
 pip install -r requirements.txt
 ```
 
+> **Windows users:** Use `py` instead of `python` if needed, and run `set PYTHONPATH=.` in each terminal before running any command.
+
 ### 2. Train (Full Pipeline)
 
 ```bash
@@ -128,8 +130,16 @@ python train.py
 
 ### 3. Launch Dashboard
 
+**macOS / Linux:**
 ```bash
 python -m src.dashboard.app
+# Open http://localhost:8050
+```
+
+**Windows:**
+```cmd
+set PYTHONPATH=.
+python src/dashboard/app.py
 # Open http://localhost:8050
 ```
 
@@ -137,8 +147,14 @@ python -m src.dashboard.app
 
 Open a **third terminal** while training + dashboard are running:
 
+**macOS / Linux:**
 ```bash
-# Run model inference on every packet in real time
+python detect.py --loop --speed 0.05
+```
+
+**Windows:**
+```cmd
+set PYTHONPATH=.
 python detect.py --loop --speed 0.05
 ```
 
