@@ -131,5 +131,8 @@ class MetricsTracker:
             except Exception:
                 pass
         self._state = merged
-        with open(self.state_file, "w") as f:
+        # Atomic write: write to temp file then rename → dashboard never reads partial JSON
+        tmp = self.state_file + ".tmp"
+        with open(tmp, "w") as f:
             json.dump(self._state, f)
+        os.replace(tmp, self.state_file)
