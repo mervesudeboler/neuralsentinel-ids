@@ -24,11 +24,11 @@ class AttentionBlock(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, dim)
-        q = self.q(x)
-        k = self.k(x)
-        v = self.v(x)
-        attn = torch.softmax(q * k * self.scale, dim=-1)
-        return self.out(attn * v) + x  # residual
+        q = self.q(x)                                                          # (B, dim//4)
+        k = self.k(x)                                                          # (B, dim//4)
+        gate = torch.sigmoid((q * k * self.scale).sum(dim=-1, keepdim=True))  # (B, 1)
+        v = self.v(x)                                                          # (B, dim)
+        return self.out(gate * v) + x                                          # residual
 
 
 class Generator(nn.Module):
