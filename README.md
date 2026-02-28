@@ -15,25 +15,27 @@
 
 <br>
 
-> 🟢 **Demo Mode** — pre-loaded with simulated training results
+> 🟢 **Demo Mode** — Dashboard running with pre-loaded simulated training results
 
 ![NeuralSentinel Demo Dashboard](assets/demo.jpeg)
 
 <br>
 
-![NeuralSentinel Dashboard 1](assets/ss1.jpeg)
+> ⚙️ **Live Training** — Real NSL-KDD dataset, actual model training in progress
+
+![NeuralSentinel Live 1](assets/ss1.jpeg)
 
 <br>
 
-![NeuralSentinel Dashboard 2](assets/ss2.jpeg)
+![NeuralSentinel Live 2](assets/ss2.jpeg)
 
 <br>
 
-![NeuralSentinel Dashboard 3](assets/ss3.jpeg)
+![NeuralSentinel Live 3](assets/ss3.jpeg)
 
 <br>
 
-![NeuralSentinel Dashboard 4](assets/ss4.jpeg)
+![NeuralSentinel Live 4](assets/ss4.jpeg)
 
 </div>
 
