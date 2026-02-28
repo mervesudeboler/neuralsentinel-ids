@@ -78,6 +78,12 @@ class MetricsTracker:
                 pass
         self._state = _default
 
+    def reset_history(self) -> None:
+        """Yeni training başlarken GAN geçmişini sıfırla."""
+        self._state["history"] = {"loss_G": [], "loss_D": [], "evasion_rate": []}
+        self._state["ids_metrics"] = {}
+        self._flush()
+
     def update_gan(self, loss_G: float, loss_D: float, evasion: float) -> None:
         self._state["history"]["loss_G"].append(round(loss_G, 5))
         self._state["history"]["loss_D"].append(round(loss_D, 5))

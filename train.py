@@ -86,6 +86,9 @@ def main():
         use_attention=cfg["gan"]["use_attention"],
     ).to(device)
 
+    # Yeni training başlıyor — GAN geçmişini sıfırla, paket sayılarını koru
+    tracker.reset_history()
+
     # Her epoch'ta dashboard'a yaz
     def on_epoch(loss_G: float, loss_D: float, evasion: float):
         tracker.update_gan(loss_G, loss_D, evasion)
