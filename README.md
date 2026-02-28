@@ -21,6 +21,14 @@
 
 ![NeuralSentinel Dashboard 2](assets/dashboard2.jpeg)
 
+<br>
+
+![NeuralSentinel Dashboard 3](assets/dashboard3.jpeg)
+
+<br>
+
+![NeuralSentinel Dashboard 4](assets/dashboard4.jpeg)
+
 </div>
 
 ---
