@@ -89,6 +89,31 @@ def main():
     # Yeni training başlıyor — GAN geçmişini sıfırla, paket sayılarını koru
     tracker.reset_history()
 
+    # ── Pre-train IDS as binary classifier ───────────────────────────────────
+    logger.info("Pre-training IDS as binary classifier …")
+    import torch.nn as nn
+    from torch.utils.data import DataLoader, TensorDataset
+    pretrain_dataset = TensorDataset(
+        torch.tensor(X_train, dtype=torch.float32),
+        torch.tensor(y_train, dtype=torch.float32),
+    )
+    pretrain_loader = DataLoader(pretrain_dataset,
+                                 batch_size=cfg["training"]["batch_size"],
+                                 shuffle=True, drop_last=True)
+    pretrain_opt = torch.optim.Adam(neural_ids.parameters(),
+                                    lr=cfg["training"]["pretrain_lr"])
+    criterion = nn.BCEWithLogitsLoss()
+    for ep in range(1, cfg["training"]["pretrain_epochs"] + 1):
+        neural_ids.train()
+        for X_b, y_b in pretrain_loader:
+            X_b, y_b = X_b.to(device), y_b.to(device)
+            logits = neural_ids(X_b).squeeze(-1)
+            loss = criterion(logits, y_b)
+            pretrain_opt.zero_grad(); loss.backward(); pretrain_opt.step()
+        if ep % 5 == 0 or ep == 1:
+            logger.info(f"  Pre-train epoch {ep}/{cfg['training']['pretrain_epochs']}")
+    logger.info("IDS pre-training complete.")
+
     # Her epoch'ta dashboard'a yaz
     def on_epoch(loss_G: float, loss_D: float, evasion: float):
         tracker.update_gan(loss_G, loss_D, evasion)

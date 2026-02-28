@@ -18,17 +18,19 @@ gan:
   generator_dims: [128, 256, 128]
   use_attention: true
   lr_g: 0.0001
-  lr_d: 0.0001
-  epochs: 30            # CPU için hızlı (eskiden 100)
-  batch_size: 512       # Daha büyük batch = daha hızlı
-  n_critic: 2           # Eskiden 5, çok yavaşlatıyordu
+  lr_d: 0.0004
+  epochs: 20            # kısa GAN (IDS zaten güçlü başlıyor)
+  batch_size: 512
+  n_critic: 2
   lambda_gp: 10.0
 
 training:
   checkpoint_dir: "checkpoints"
-  harden_epochs: 10     # Eskiden 30
+  pretrain_epochs: 25   # IDS önce sınıflandırıcı olarak eğitilir
+  pretrain_lr: 0.001
+  harden_epochs: 10
   batch_size: 512
-  n_adversarial: 2000   # Eskiden 5000
+  n_adversarial: 2000
 
 dashboard:
   state_file: "data/dashboard_state.json"

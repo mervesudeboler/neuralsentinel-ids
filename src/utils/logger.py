@@ -113,5 +113,15 @@ class MetricsTracker:
         self._flush()
 
     def _flush(self) -> None:
+        # Re-read file first to avoid overwriting concurrent process changes
+        if os.path.exists(self.state_file):
+            try:
+                with open(self.state_file) as f:
+                    on_disk = json.load(f)
+                # Merge: keep disk version but apply our in-memory updates
+                on_disk.update(self._state)
+                self._state = on_disk
+            except Exception:
+                pass
         with open(self.state_file, "w") as f:
             json.dump(self._state, f)
