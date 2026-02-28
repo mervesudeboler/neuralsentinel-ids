@@ -13,6 +13,14 @@
 
 *A self-adversarial ML system that attacks its own IDS to make it stronger.*
 
+<br>
+
+![NeuralSentinel Dashboard](assets/dashboard.jpeg)
+
+<br>
+
+![NeuralSentinel Dashboard 2](assets/dashboard2.jpeg)
+
 </div>
 
 ---
