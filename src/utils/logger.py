@@ -113,15 +113,23 @@ class MetricsTracker:
         self._flush()
 
     def _flush(self) -> None:
-        # Re-read file first to avoid overwriting concurrent process changes
+        merged = dict(self._state)
         if os.path.exists(self.state_file):
             try:
                 with open(self.state_file) as f:
                     on_disk = json.load(f)
-                # Merge: keep disk version but apply our in-memory updates
-                on_disk.update(self._state)
-                self._state = on_disk
+                # History: keep the longer list (training data must not be lost)
+                merged["history"] = {}
+                for key in ["loss_G", "loss_D", "evasion_rate"]:
+                    disk_list = on_disk.get("history", {}).get(key, [])
+                    mem_list  = self._state.get("history", {}).get(key, [])
+                    merged["history"][key] = disk_list if len(disk_list) > len(mem_list) else mem_list
+                # ids_metrics: disk wins if memory is empty
+                if on_disk.get("ids_metrics") and not self._state.get("ids_metrics"):
+                    merged["ids_metrics"] = on_disk["ids_metrics"]
+                # Packet counts: memory wins (detect.py owns these)
             except Exception:
                 pass
+        self._state = merged
         with open(self.state_file, "w") as f:
             json.dump(self._state, f)
