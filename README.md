@@ -15,6 +15,10 @@
 
 <br>
 
+![NeuralSentinel Dashboard](assets/dashboard5.jpeg)
+
+<br>
+
 ![NeuralSentinel Dashboard](assets/dashboard.jpeg)
 
 <br>
