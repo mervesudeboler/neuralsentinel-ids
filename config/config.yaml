@@ -15,20 +15,20 @@ ids:
 
 gan:
   latent_dim: 64
-  generator_dims: [128, 256, 256, 128]
+  generator_dims: [128, 256, 128]
   use_attention: true
   lr_g: 0.0001
   lr_d: 0.0001
-  epochs: 100
-  batch_size: 256
-  n_critic: 5           # Discriminator updates per Generator update
-  lambda_gp: 10.0       # Gradient penalty coefficient
+  epochs: 30            # CPU için hızlı (eskiden 100)
+  batch_size: 512       # Daha büyük batch = daha hızlı
+  n_critic: 2           # Eskiden 5, çok yavaşlatıyordu
+  lambda_gp: 10.0
 
 training:
   checkpoint_dir: "checkpoints"
-  harden_epochs: 30
-  batch_size: 256
-  n_adversarial: 5000   # Fake samples injected during hardening
+  harden_epochs: 10     # Eskiden 30
+  batch_size: 512
+  n_adversarial: 2000   # Eskiden 5000
 
 dashboard:
   state_file: "data/dashboard_state.json"

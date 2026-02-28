@@ -86,6 +86,10 @@ def main():
         use_attention=cfg["gan"]["use_attention"],
     ).to(device)
 
+    # Her epoch'ta dashboard'a yaz
+    def on_epoch(loss_G: float, loss_D: float, evasion: float):
+        tracker.update_gan(loss_G, loss_D, evasion)
+
     trainer = AdversarialTrainer(
         generator=generator,
         ids=neural_ids,
@@ -96,6 +100,7 @@ def main():
         lambda_gp=cfg["gan"]["lambda_gp"],
         n_critic=cfg["gan"]["n_critic"],
         save_dir=cfg["training"]["checkpoint_dir"],
+        epoch_callback=on_epoch,
     )
 
     # ── Classical IDS baseline ────────────────────────────────────────────────
@@ -110,7 +115,6 @@ def main():
 
     # ── Phase 1: GAN ──────────────────────────────────────────────────────────
     if args.phase in ("all", "gan"):
-        # Train on benign-only samples to teach Generator to mimic normal traffic
         X_normal = X_train[y_train == 0]
         logger.info(f"GAN training on {len(X_normal)} normal samples …")
         trainer.train_gan(
@@ -118,13 +122,6 @@ def main():
             epochs=cfg["gan"]["epochs"],
             batch_size=cfg["gan"]["batch_size"],
         )
-        # Push history to dashboard
-        for i, (lg, ld, er) in enumerate(zip(
-            trainer.history["loss_G"],
-            trainer.history["loss_D"],
-            trainer.history["evasion_rate"],
-        )):
-            tracker.update_gan(lg, ld, er)
 
     # ── Phase 2: Hardening ────────────────────────────────────────────────────
     if args.phase in ("all", "harden"):

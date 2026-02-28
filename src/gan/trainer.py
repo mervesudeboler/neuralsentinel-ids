@@ -12,7 +12,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 import logging
 
 from src.gan.generator import Generator
@@ -61,8 +61,9 @@ class AdversarialTrainer:
         lr_d: float = 1e-4,
         latent_dim: int = 64,
         lambda_gp: float = 10.0,
-        n_critic: int = 5,           # Discriminator steps per Generator step
+        n_critic: int = 5,
         save_dir: str = "checkpoints",
+        epoch_callback: Optional[Callable] = None,  # real-time dashboard update
     ):
         self.G = generator.to(device)
         self.D = ids.to(device)
@@ -71,6 +72,7 @@ class AdversarialTrainer:
         self.lambda_gp = lambda_gp
         self.n_critic = n_critic
         self.save_dir = save_dir
+        self.epoch_callback = epoch_callback
         os.makedirs(save_dir, exist_ok=True)
 
         self.opt_G = optim.Adam(self.G.parameters(), lr=lr_g, betas=(0.0, 0.9))
@@ -140,8 +142,12 @@ class AdversarialTrainer:
             evasion = self._evasion_rate(X_real[:512])
             self.history["evasion_rate"].append(evasion)
 
+            # ── Real-time dashboard update ──────────────────────────────────
+            if self.epoch_callback is not None:
+                self.epoch_callback(float(mean_G), float(mean_D), float(evasion))
+
             elapsed = time.time() - t0
-            if epoch % 10 == 0 or epoch == 1:
+            if epoch % 5 == 0 or epoch == 1:
                 logger.info(
                     f"Epoch {epoch:>4}/{epochs} | "
                     f"D: {mean_D:+.4f} | G: {mean_G:+.4f} | "
