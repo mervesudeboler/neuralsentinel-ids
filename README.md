@@ -33,10 +33,6 @@
 
 ![NeuralSentinel Live 3](assets/ss3.jpeg)
 
-<br>
-
-![NeuralSentinel Live 4](assets/ss4.jpeg)
-
 </div>
 
 ---
