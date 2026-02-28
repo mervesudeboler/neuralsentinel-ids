@@ -15,23 +15,25 @@
 
 <br>
 
-![NeuralSentinel Dashboard](assets/dashboard5.jpeg)
+> 🟢 **Demo Mode** — pre-loaded with simulated training results
+
+![NeuralSentinel Demo Dashboard](assets/demo.jpeg)
 
 <br>
 
-![NeuralSentinel Dashboard](assets/dashboard.jpeg)
+![NeuralSentinel Dashboard 1](assets/ss1.jpeg)
 
 <br>
 
-![NeuralSentinel Dashboard 2](assets/dashboard2.jpeg)
+![NeuralSentinel Dashboard 2](assets/ss2.jpeg)
 
 <br>
 
-![NeuralSentinel Dashboard 3](assets/dashboard3.jpeg)
+![NeuralSentinel Dashboard 3](assets/ss3.jpeg)
 
 <br>
 
-![NeuralSentinel Dashboard 4](assets/dashboard4.jpeg)
+![NeuralSentinel Dashboard 4](assets/ss4.jpeg)
 
 </div>
 
