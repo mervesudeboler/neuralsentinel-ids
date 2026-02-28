@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Data (download via script)
+data/*.txt
+data/*.csv
+data/preprocessor.pkl
+
+# Checkpoints & outputs
+checkpoints/
+logs/
+reports/
+
+# Dashboard state
+data/dashboard_state.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Notebooks
+.ipynb_checkpoints/

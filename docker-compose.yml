@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  neuralsentinel:
+    build: .
+    container_name: neuralsentinel-ids
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./data:/app/data
+      - ./checkpoints:/app/checkpoints
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+    environment:
+      - NEURALSENTINEL_STATE=data/dashboard_state.json
+    command: python train.py --phase all
+
+  dashboard:
+    build: .
+    container_name: neuralsentinel-dashboard
+    ports:
+      - "8051:8050"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - neuralsentinel
+    command: python src/dashboard/app.py
+    restart: unless-stopped
