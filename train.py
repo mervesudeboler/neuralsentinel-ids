@@ -118,6 +118,10 @@ def main():
             logger.info(f"  Pre-train epoch {ep}/{cfg['training']['pretrain_epochs']}")
     logger.info("IDS pre-training complete.")
 
+    # Pre-trained ağırlıkları kaydet — GAN training bunları bozacak, hardening öncesi geri yükleyeceğiz
+    import copy
+    pretrained_ids_weights = copy.deepcopy(neural_ids.state_dict())
+
     # Her epoch'ta dashboard'a yaz
     def on_epoch(loss_G: float, loss_D: float, evasion: float):
         tracker.update_gan(loss_G, loss_D, evasion)
@@ -157,6 +161,9 @@ def main():
 
     # ── Phase 2: Hardening ────────────────────────────────────────────────────
     if args.phase in ("all", "harden"):
+        # GAN training IDS ağırlıklarını bozdu — pre-trained ağırlıkları geri yükle
+        neural_ids.load_state_dict(pretrained_ids_weights)
+        logger.info("IDS weights restored to pre-trained state for hardening.")
         logger.info("Hardening IDS with adversarial samples …")
         trainer.harden_ids(
             X_train=X_train,
