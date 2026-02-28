@@ -201,7 +201,13 @@ def refresh(_):
     kpi_packets = f"{s.get('total_packets', 0):,}"
     kpi_attacks = f"{s.get('attacks_detected', 0):,}"
     kpi_f1      = f"{metrics.get('f1_weighted', 0):.4f}" if metrics else "N/A"
-    kpi_evasion = f"{er_list[-1]:.2%}" if er_list else "N/A"
+    # Show post-hardening evasion if available, else last GAN training evasion
+    if metrics and "evasion_after_hardening" in metrics:
+        kpi_evasion = f"{metrics['evasion_after_hardening']:.2f}%"
+    elif er_list:
+        kpi_evasion = f"{er_list[-1] * 100:.2f}%"
+    else:
+        kpi_evasion = "N/A"
 
     # GAN chart
     epochs = list(range(1, len(hist.get("loss_G", [])) + 1))

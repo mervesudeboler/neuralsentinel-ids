@@ -200,8 +200,10 @@ class AdversarialTrainer:
             total_loss = 0.0
             for X_b, y_b in loader:
                 X_b, y_b = X_b.to(self.device), y_b.to(self.device)
+                # Label smoothing: attacks→0.9, normal→0.1 (reduces overconfidence)
+                y_smooth = y_b * 0.9 + (1 - y_b) * 0.1
                 logits = self.D(X_b).squeeze(-1)
-                loss = criterion(logits, y_b)
+                loss = criterion(logits, y_smooth)
                 self.opt_D.zero_grad()
                 loss.backward()
                 self.opt_D.step()

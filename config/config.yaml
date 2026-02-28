@@ -17,18 +17,18 @@ gan:
   latent_dim: 64
   generator_dims: [128, 256, 128]
   use_attention: true
-  lr_g: 0.0001
+  lr_g: 0.00005          # daha yavaş generator → discriminator ayak uydurur
   lr_d: 0.0004
-  epochs: 20            # kısa GAN (IDS zaten güçlü başlıyor)
+  epochs: 20
   batch_size: 512
-  n_critic: 2
+  n_critic: 4            # 2→4: discriminator daha güçlü kalır
   lambda_gp: 10.0
 
 training:
   checkpoint_dir: "checkpoints"
-  pretrain_epochs: 25   # IDS önce sınıflandırıcı olarak eğitilir
+  pretrain_epochs: 30    # IDS önce güçlü classifier olarak eğitilir
   pretrain_lr: 0.001
-  harden_epochs: 10
+  harden_epochs: 15      # 10→15: daha iyi adversarial robustness
   batch_size: 512
   n_adversarial: 2000
 

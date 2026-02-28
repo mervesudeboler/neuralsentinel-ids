@@ -177,6 +177,13 @@ def main():
         pre = precision_score(y_test, preds, average="weighted", zero_division=0)
         rec = recall_score(y_test, preds, average="weighted", zero_division=0)
         cm  = confusion_matrix(y_test, preds).tolist()
+        # Post-hardening evasion: GAN'ın hardened IDS'i ne kadar kandırabiliyor?
+        with torch.no_grad():
+            z = torch.randn(2000, cfg["gan"]["latent_dim"], device=device)
+            fake = generator(z)
+            adv_preds = neural_ids.predict(fake)
+            post_evasion = float((adv_preds == 0).float().mean().item()) * 100
+
         hardened_metrics = {
             "f1_weighted": round(f1,  4),
             "roc_auc":     round(auc, 4),
@@ -184,8 +191,10 @@ def main():
             "precision":   round(pre, 4),
             "recall":      round(rec, 4),
             "confusion_matrix": cm,
+            "evasion_after_hardening": round(post_evasion, 2),
         }
         logger.info(f"Hardened IDS metrics: {hardened_metrics}")
+        logger.info(f"Post-hardening GAN evasion: {post_evasion:.2f}%")
         tracker.update_ids_metrics(hardened_metrics)
 
     # ── Save final models ─────────────────────────────────────────────────────
