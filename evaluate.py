@@ -17,9 +17,13 @@ import json
 import torch
 import numpy as np
 from sklearn.metrics import (
-    classification_report, confusion_matrix, roc_curve, auc,
+    classification_report,
+    confusion_matrix,
+    roc_curve,
+    auc,
 )
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import yaml
@@ -66,7 +70,8 @@ def plot_confusion(cm: np.ndarray, path: str):
     fig, ax = plt.subplots(figsize=(5, 4), facecolor="#161b22")
     ax.set_facecolor("#0d1117")
     im = ax.imshow(cm, cmap="Blues")
-    ax.set_xticks([0, 1]); ax.set_yticks([0, 1])
+    ax.set_xticks([0, 1])
+    ax.set_yticks([0, 1])
     ax.set_xticklabels(["Normal", "Attack"], color="white")
     ax.set_yticklabels(["Normal", "Attack"], color="white")
     ax.set_xlabel("Predicted", color="white")
@@ -74,7 +79,15 @@ def plot_confusion(cm: np.ndarray, path: str):
     ax.set_title("Confusion Matrix", color="white")
     for i in range(2):
         for j in range(2):
-            ax.text(j, i, str(cm[i, j]), ha="center", va="center", color="white", fontsize=14)
+            ax.text(
+                j,
+                i,
+                str(cm[i, j]),
+                ha="center",
+                va="center",
+                color="white",
+                fontsize=14,
+            )
     plt.colorbar(im, ax=ax)
     plt.tight_layout()
     plt.savefig(path, dpi=150)
@@ -93,21 +106,16 @@ def main():
     device = torch.device(device_str)
 
     # ── Load data ─────────────────────────────────────────────────────────────
-    prep = NSLKDDPreprocessor.load(
-        os.path.join(cfg["data"]["dir"], "preprocessor.pkl")
-    )
-    _, _, splits_df = prep.transform(
-        os.path.join(cfg["data"]["dir"], "KDDTest+.txt")
-    )
-    X_test, y_test, _ = prep.transform(
-        os.path.join(cfg["data"]["dir"], "KDDTest+.txt")
-    )
+    prep = NSLKDDPreprocessor.load(os.path.join(cfg["data"]["dir"], "preprocessor.pkl"))
+    _, _, splits_df = prep.transform(os.path.join(cfg["data"]["dir"], "KDDTest+.txt"))
+    X_test, y_test, _ = prep.transform(os.path.join(cfg["data"]["dir"], "KDDTest+.txt"))
     n_features = X_test.shape[1]
 
     # ── Load models ───────────────────────────────────────────────────────────
     ids = NeuralIDS(n_features, hidden_dims=cfg["ids"]["hidden_dims"]).to(device)
-    gen = Generator(n_features, cfg["gan"]["latent_dim"],
-                    cfg["gan"]["generator_dims"]).to(device)
+    gen = Generator(
+        n_features, cfg["gan"]["latent_dim"], cfg["gan"]["generator_dims"]
+    ).to(device)
 
     ckpt_path = args.checkpoint or os.path.join(
         cfg["training"]["checkpoint_dir"], "neural_ids_final.pt"
@@ -118,7 +126,8 @@ def main():
     if os.path.exists(gen_path):
         gen.load_state_dict(torch.load(gen_path, map_location=device))
 
-    ids.eval(); gen.eval()
+    ids.eval()
+    gen.eval()
 
     # ── Evaluate IDS ──────────────────────────────────────────────────────────
     X_t = torch.tensor(X_test, dtype=torch.float32).to(device)
@@ -126,10 +135,14 @@ def main():
         proba = ids.predict_proba(X_t).cpu().numpy().flatten()
         preds = (proba >= 0.5).astype(int)
 
-    report = classification_report(y_test, preds, output_dict=True, target_names=["Normal", "Attack"])
+    report = classification_report(
+        y_test, preds, output_dict=True, target_names=["Normal", "Attack"]
+    )
     cm = confusion_matrix(y_test, preds)
 
-    logger.info("\n" + classification_report(y_test, preds, target_names=["Normal", "Attack"]))
+    logger.info(
+        "\n" + classification_report(y_test, preds, target_names=["Normal", "Attack"])
+    )
 
     # ── GAN Evasion Rate ──────────────────────────────────────────────────────
     n_test = 2000
@@ -141,8 +154,9 @@ def main():
     logger.info(f"GAN Evasion Rate (post-hardening): {evasion_rate:.2%}")
 
     # ── Save plots ────────────────────────────────────────────────────────────
-    plot_roc(y_test, proba, "IDS ROC Curve",
-             os.path.join(args.report_dir, "roc_curve.png"))
+    plot_roc(
+        y_test, proba, "IDS ROC Curve", os.path.join(args.report_dir, "roc_curve.png")
+    )
     plot_confusion(cm, os.path.join(args.report_dir, "confusion_matrix.png"))
 
     # ── Save JSON report ──────────────────────────────────────────────────────

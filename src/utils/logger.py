@@ -12,14 +12,14 @@ from typing import Any, Dict
 
 class ColorFormatter(logging.Formatter):
     COLORS = {
-        logging.DEBUG:    "\033[36m",   # Cyan
-        logging.INFO:     "\033[32m",   # Green
-        logging.WARNING:  "\033[33m",   # Yellow
-        logging.ERROR:    "\033[31m",   # Red
-        logging.CRITICAL: "\033[35m",   # Magenta
+        logging.DEBUG: "\033[36m",  # Cyan
+        logging.INFO: "\033[32m",  # Green
+        logging.WARNING: "\033[33m",  # Yellow
+        logging.ERROR: "\033[31m",  # Red
+        logging.CRITICAL: "\033[35m",  # Magenta
     }
     RESET = "\033[0m"
-    BOLD  = "\033[1m"
+    BOLD = "\033[1m"
 
     def format(self, record: logging.LogRecord) -> str:
         color = self.COLORS.get(record.levelno, self.RESET)
@@ -30,7 +30,9 @@ class ColorFormatter(logging.Formatter):
         return f"[{ts}] {level} {name} · {msg}"
 
 
-def setup_logger(name: str = "neuralsentinel", level: int = logging.INFO) -> logging.Logger:
+def setup_logger(
+    name: str = "neuralsentinel", level: int = logging.INFO
+) -> logging.Logger:
     logger = logging.getLogger(name)
     if logger.handlers:
         return logger
@@ -43,10 +45,12 @@ def setup_logger(name: str = "neuralsentinel", level: int = logging.INFO) -> log
 
     # File
     os.makedirs("logs", exist_ok=True)
-    fh = logging.FileHandler(f"logs/neuralsentinel_{datetime.now().strftime('%Y%m%d')}.log")
-    fh.setFormatter(logging.Formatter(
-        "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-    ))
+    fh = logging.FileHandler(
+        f"logs/neuralsentinel_{datetime.now().strftime('%Y%m%d')}.log"
+    )
+    fh.setFormatter(
+        logging.Formatter("%(asctime)s | %(levelname)-8s | %(name)s | %(message)s")
+    )
     logger.addHandler(fh)
 
     logger.propagate = False
@@ -121,8 +125,10 @@ class MetricsTracker:
                 merged["history"] = {}
                 for key in ["loss_G", "loss_D", "evasion_rate"]:
                     disk_list = on_disk.get("history", {}).get(key, [])
-                    mem_list  = self._state.get("history", {}).get(key, [])
-                    merged["history"][key] = disk_list if len(disk_list) > len(mem_list) else mem_list
+                    mem_list = self._state.get("history", {}).get(key, [])
+                    merged["history"][key] = (
+                        disk_list if len(disk_list) > len(mem_list) else mem_list
+                    )
                 # ids_metrics: disk wins if memory is empty
                 if on_disk.get("ids_metrics") and not self._state.get("ids_metrics"):
                     merged["ids_metrics"] = on_disk["ids_metrics"]

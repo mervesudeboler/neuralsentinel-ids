@@ -24,11 +24,11 @@ class AttentionBlock(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, dim)
-        q = self.q(x)                                                          # (B, dim//4)
-        k = self.k(x)                                                          # (B, dim//4)
+        q = self.q(x)  # (B, dim//4)
+        k = self.k(x)  # (B, dim//4)
         gate = torch.sigmoid((q * k * self.scale).sum(dim=-1, keepdim=True))  # (B, 1)
-        v = self.v(x)                                                          # (B, dim)
-        return self.out(gate * v) + x                                          # residual
+        v = self.v(x)  # (B, dim)
+        return self.out(gate * v) + x  # residual
 
 
 class Generator(nn.Module):
@@ -45,7 +45,7 @@ class Generator(nn.Module):
         n_features: int,
         latent_dim: int = 64,
         hidden_dims: Optional[List[int]] = None,
-        n_classes: int = 0,          # 0 = unconditional
+        n_classes: int = 0,  # 0 = unconditional
         use_attention: bool = True,
     ):
         super().__init__()
@@ -63,11 +63,13 @@ class Generator(nn.Module):
 
         blocks: List[nn.Module] = []
         for h_dim in hidden_dims:
-            blocks.extend([
-                nn.Linear(in_dim, h_dim),
-                nn.BatchNorm1d(h_dim),
-                nn.GELU(),
-            ])
+            blocks.extend(
+                [
+                    nn.Linear(in_dim, h_dim),
+                    nn.BatchNorm1d(h_dim),
+                    nn.GELU(),
+                ]
+            )
             in_dim = h_dim
 
         self.body = nn.Sequential(*blocks)

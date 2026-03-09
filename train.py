@@ -16,8 +16,12 @@ import torch.nn as nn
 import yaml
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import (
-    f1_score, roc_auc_score, accuracy_score,
-    precision_score, recall_score, confusion_matrix,
+    f1_score,
+    roc_auc_score,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    confusion_matrix,
 )
 
 from src.data.preprocessor import NSLKDDPreprocessor
@@ -32,10 +36,12 @@ logger = setup_logger("neuralsentinel.train")
 def parse_args():
     parser = argparse.ArgumentParser(description="NeuralSentinel-IDS Training")
     parser.add_argument("--config", default="config/config.yaml")
-    parser.add_argument("--phase", choices=["all", "gan", "harden", "classical"],
-                        default="all")
-    parser.add_argument("--device", default=None,
-                        help="cuda / cpu (auto-detected if omitted)")
+    parser.add_argument(
+        "--phase", choices=["all", "gan", "harden", "classical"], default="all"
+    )
+    parser.add_argument(
+        "--device", default=None, help="cuda / cpu (auto-detected if omitted)"
+    )
     return parser.parse_args()
 
 
@@ -68,13 +74,15 @@ def main():
         val_size=cfg["data"]["val_size"],
     )
     X_train, y_train = splits["train"]
-    X_val,   y_val   = splits["val"]
-    X_test,  y_test  = splits["test"]
+    X_val, y_val = splits["val"]
+    X_test, y_test = splits["test"]
     n_features = X_train.shape[1]
 
     prep.save(os.path.join(cfg["data"]["dir"], "preprocessor.pkl"))
-    logger.info(f"Features: {n_features} | Train: {len(X_train)} | "
-                f"Val: {len(X_val)} | Test: {len(X_test)}")
+    logger.info(
+        f"Features: {n_features} | Train: {len(X_train)} | "
+        f"Val: {len(X_val)} | Test: {len(X_test)}"
+    )
 
     # ── Models ────────────────────────────────────────────────────────────────
     neural_ids = NeuralIDS(
@@ -99,11 +107,15 @@ def main():
         torch.tensor(X_train, dtype=torch.float32),
         torch.tensor(y_train, dtype=torch.float32),
     )
-    pretrain_loader = DataLoader(pretrain_dataset,
-                                 batch_size=cfg["training"]["batch_size"],
-                                 shuffle=True, drop_last=True)
-    pretrain_opt = torch.optim.Adam(neural_ids.parameters(),
-                                    lr=cfg["training"]["pretrain_lr"])
+    pretrain_loader = DataLoader(
+        pretrain_dataset,
+        batch_size=cfg["training"]["batch_size"],
+        shuffle=True,
+        drop_last=True,
+    )
+    pretrain_opt = torch.optim.Adam(
+        neural_ids.parameters(), lr=cfg["training"]["pretrain_lr"]
+    )
     criterion = nn.BCEWithLogitsLoss()
     for ep in range(1, cfg["training"]["pretrain_epochs"] + 1):
         neural_ids.train()
@@ -111,13 +123,16 @@ def main():
             X_b, y_b = X_b.to(device), y_b.to(device)
             logits = neural_ids(X_b).squeeze(-1)
             loss = criterion(logits, y_b)
-            pretrain_opt.zero_grad(); loss.backward(); pretrain_opt.step()
+            pretrain_opt.zero_grad()
+            loss.backward()
+            pretrain_opt.step()
         if ep % 5 == 0 or ep == 1:
             logger.info(f"  Pre-train epoch {ep}/{cfg['training']['pretrain_epochs']}")
     logger.info("IDS pre-training complete.")
 
     # Pre-trained ağırlıkları kaydet — GAN training bunları bozacak, hardening öncesi geri yükleyeceğiz
     import copy
+
     pretrained_ids_weights = copy.deepcopy(neural_ids.state_dict())
 
     # Her epoch'ta dashboard'a yaz
@@ -139,8 +154,11 @@ def main():
 
     # ── Classical IDS baseline ────────────────────────────────────────────────
     if args.phase in ("all", "classical"):
-        ensemble = EnsembleIDS(n_features=n_features, device=device_str,
-                               neural_weight=cfg["ids"]["neural_weight"])
+        ensemble = EnsembleIDS(
+            n_features=n_features,
+            device=device_str,
+            neural_weight=cfg["ids"]["neural_weight"],
+        )
         logger.info("Training classical ensemble baselines …")
         ensemble.fit_classical(X_train, y_train)
         baseline_metrics = ensemble.evaluate(X_test, y_test)
@@ -176,12 +194,12 @@ def main():
         X_t = torch.tensor(X_test, dtype=torch.float32).to(device)
         with torch.no_grad():
             preds = neural_ids.predict(X_t).cpu().numpy()
-        f1  = f1_score(y_test, preds, average="weighted")
+        f1 = f1_score(y_test, preds, average="weighted")
         auc = roc_auc_score(y_test, preds)
         acc = accuracy_score(y_test, preds)
         pre = precision_score(y_test, preds, average="weighted", zero_division=0)
         rec = recall_score(y_test, preds, average="weighted", zero_division=0)
-        cm  = confusion_matrix(y_test, preds).tolist()
+        cm = confusion_matrix(y_test, preds).tolist()
         # Post-hardening evasion: GAN'ın hardened IDS'i ne kadar kandırabiliyor?
         with torch.no_grad():
             z = torch.randn(2000, cfg["gan"]["latent_dim"], device=device)
@@ -190,11 +208,11 @@ def main():
             post_evasion = float((adv_preds == 0).float().mean().item()) * 100
 
         hardened_metrics = {
-            "f1_weighted": round(f1,  4),
-            "roc_auc":     round(auc, 4),
-            "accuracy":    round(acc, 4),
-            "precision":   round(pre, 4),
-            "recall":      round(rec, 4),
+            "f1_weighted": round(f1, 4),
+            "roc_auc": round(auc, 4),
+            "accuracy": round(acc, 4),
+            "precision": round(pre, 4),
+            "recall": round(rec, 4),
             "confusion_matrix": cm,
             "evasion_after_hardening": round(post_evasion, 2),
         }
@@ -204,10 +222,14 @@ def main():
 
     # ── Save final models ─────────────────────────────────────────────────────
     os.makedirs(cfg["training"]["checkpoint_dir"], exist_ok=True)
-    torch.save(neural_ids.state_dict(),
-               os.path.join(cfg["training"]["checkpoint_dir"], "neural_ids_final.pt"))
-    torch.save(generator.state_dict(),
-               os.path.join(cfg["training"]["checkpoint_dir"], "generator_final.pt"))
+    torch.save(
+        neural_ids.state_dict(),
+        os.path.join(cfg["training"]["checkpoint_dir"], "neural_ids_final.pt"),
+    )
+    torch.save(
+        generator.state_dict(),
+        os.path.join(cfg["training"]["checkpoint_dir"], "generator_final.pt"),
+    )
     logger.info("Training complete. Models saved.")
 
 

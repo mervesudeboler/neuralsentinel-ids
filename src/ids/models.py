@@ -9,7 +9,10 @@ import torch.nn as nn
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.metrics import (
-    classification_report, confusion_matrix, roc_auc_score, f1_score,
+    classification_report,
+    confusion_matrix,
+    roc_auc_score,
+    f1_score,
 )
 from typing import Optional, List
 import logging
@@ -25,8 +28,12 @@ class NeuralIDS(nn.Module):
     Output: probability [0,1] that the sample is malicious (attack).
     """
 
-    def __init__(self, n_features: int, hidden_dims: Optional[List[int]] = None,
-                 dropout: float = 0.3):
+    def __init__(
+        self,
+        n_features: int,
+        hidden_dims: Optional[List[int]] = None,
+        dropout: float = 0.3,
+    ):
         super().__init__()
         if hidden_dims is None:
             hidden_dims = [256, 128, 64, 32]
@@ -36,12 +43,14 @@ class NeuralIDS(nn.Module):
 
         in_dim = n_features
         for h_dim in hidden_dims:
-            layers.extend([
-                nn.Linear(in_dim, h_dim),
-                nn.BatchNorm1d(h_dim),
-                nn.LeakyReLU(0.2, inplace=True),
-                nn.Dropout(dropout),
-            ])
+            layers.extend(
+                [
+                    nn.Linear(in_dim, h_dim),
+                    nn.BatchNorm1d(h_dim),
+                    nn.LeakyReLU(0.2, inplace=True),
+                    nn.Dropout(dropout),
+                ]
+            )
             in_dim = h_dim
 
         self.backbone = nn.Sequential(*layers)
@@ -60,7 +69,9 @@ class NeuralIDS(nn.Module):
     def _init_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Linear):
-                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="leaky_relu")
+                nn.init.kaiming_normal_(
+                    m.weight, mode="fan_out", nonlinearity="leaky_relu"
+                )
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
@@ -85,8 +96,9 @@ class EnsembleIDS:
     Gradient Boosting via soft-voting ensemble.
     """
 
-    def __init__(self, n_features: int, device: str = "cpu",
-                 neural_weight: float = 0.5):
+    def __init__(
+        self, n_features: int, device: str = "cpu", neural_weight: float = 0.5
+    ):
         self.device = torch.device(device)
         self.neural_weight = neural_weight
         self.rf_weight = (1 - neural_weight) * 0.6
@@ -94,11 +106,17 @@ class EnsembleIDS:
 
         self.neural = NeuralIDS(n_features).to(self.device)
         self.rf = RandomForestClassifier(
-            n_estimators=200, max_depth=20, min_samples_split=5,
-            class_weight="balanced", random_state=42, n_jobs=-1,
+            n_estimators=200,
+            max_depth=20,
+            min_samples_split=5,
+            class_weight="balanced",
+            random_state=42,
+            n_jobs=-1,
         )
         self.gb = GradientBoostingClassifier(
-            n_estimators=100, max_depth=5, learning_rate=0.05,
+            n_estimators=100,
+            max_depth=5,
+            learning_rate=0.05,
             random_state=42,
         )
         self._rf_fitted = False
@@ -112,9 +130,7 @@ class EnsembleIDS:
         self.gb.fit(X, y)
         self._gb_fitted = True
 
-    def predict_ensemble(
-        self, X: np.ndarray, threshold: float = 0.5
-    ) -> np.ndarray:
+    def predict_ensemble(self, X: np.ndarray, threshold: float = 0.5) -> np.ndarray:
         self.neural.eval()
         X_t = torch.tensor(X, dtype=torch.float32).to(self.device)
         with torch.no_grad():

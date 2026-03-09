@@ -81,8 +81,11 @@ class AdversarialTrainer:
         self.scheduler_D = optim.lr_scheduler.CosineAnnealingLR(self.opt_D, T_max=50)
 
         self.history: Dict[str, List[float]] = {
-            "loss_G": [], "loss_D": [], "evasion_rate": [],
-            "ids_f1_before": [], "ids_f1_after": [],
+            "loss_G": [],
+            "loss_D": [],
+            "evasion_rate": [],
+            "ids_f1_before": [],
+            "ids_f1_after": [],
         }
 
     # ── Phase 1: GAN Training ─────────────────────────────────────────────────
@@ -93,10 +96,10 @@ class AdversarialTrainer:
         batch_size: int = 256,
     ) -> None:
         logger.info(f"Phase 1: GAN training — {epochs} epochs …")
-        dataset = TensorDataset(
-            torch.tensor(X_real, dtype=torch.float32)
+        dataset = TensorDataset(torch.tensor(X_real, dtype=torch.float32))
+        loader = DataLoader(
+            dataset, batch_size=batch_size, shuffle=True, drop_last=True
         )
-        loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=True)
 
         for epoch in range(1, epochs + 1):
             t0 = time.time()
@@ -113,7 +116,9 @@ class AdversarialTrainer:
 
                     d_real = self.D(real_batch)
                     d_fake = self.D(fake_batch)
-                    gp = gradient_penalty(self.D, real_batch, fake_batch, self.device, self.lambda_gp)
+                    gp = gradient_penalty(
+                        self.D, real_batch, fake_batch, self.device, self.lambda_gp
+                    )
                     loss_D = d_fake.mean() - d_real.mean() + gp
 
                     self.opt_D.zero_grad()
@@ -173,7 +178,9 @@ class AdversarialTrainer:
         labelled as attacks, then fine-tune the IDS.
         This is the core Adversarial Training step.
         """
-        logger.info(f"Phase 2: Hardening IDS with {n_adversarial} adversarial samples …")
+        logger.info(
+            f"Phase 2: Hardening IDS with {n_adversarial} adversarial samples …"
+        )
 
         # Generate adversarial samples
         X_adv = self.G.sample_numpy(n_adversarial, self.device)
@@ -190,7 +197,9 @@ class AdversarialTrainer:
             torch.tensor(X_aug, dtype=torch.float32),
             torch.tensor(y_aug, dtype=torch.float32),
         )
-        loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+        loader = DataLoader(
+            dataset, batch_size=batch_size, shuffle=True, drop_last=True
+        )
         criterion = nn.BCEWithLogitsLoss()
 
         self.opt_D = optim.Adam(self.D.parameters(), lr=2e-4, betas=(0.9, 0.999))
@@ -210,7 +219,9 @@ class AdversarialTrainer:
                 total_loss += loss.item()
 
             if epoch % 10 == 0 or epoch == 1:
-                logger.info(f"  Hardening epoch {epoch}/{epochs} | loss: {total_loss/len(loader):.4f}")
+                logger.info(
+                    f"  Hardening epoch {epoch}/{epochs} | loss: {total_loss/len(loader):.4f}"
+                )
 
         logger.info("Phase 2 complete. IDS hardened.")
 
@@ -227,14 +238,17 @@ class AdversarialTrainer:
         return evaded
 
     def _save_checkpoint(self, epoch: int) -> None:
-        torch.save({
-            "epoch": epoch,
-            "generator_state": self.G.state_dict(),
-            "ids_state": self.D.state_dict(),
-            "opt_G": self.opt_G.state_dict(),
-            "opt_D": self.opt_D.state_dict(),
-            "history": self.history,
-        }, os.path.join(self.save_dir, f"checkpoint_epoch_{epoch}.pt"))
+        torch.save(
+            {
+                "epoch": epoch,
+                "generator_state": self.G.state_dict(),
+                "ids_state": self.D.state_dict(),
+                "opt_G": self.opt_G.state_dict(),
+                "opt_D": self.opt_D.state_dict(),
+                "history": self.history,
+            },
+            os.path.join(self.save_dir, f"checkpoint_epoch_{epoch}.pt"),
+        )
         logger.info(f"Checkpoint saved → epoch {epoch}")
 
     def load_checkpoint(self, path: str) -> None:

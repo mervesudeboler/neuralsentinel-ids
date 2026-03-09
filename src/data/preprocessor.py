@@ -17,17 +17,49 @@ logger = logging.getLogger(__name__)
 
 # ─── NSL-KDD Column Names ────────────────────────────────────────────────────
 FEATURE_NAMES = [
-    "duration", "protocol_type", "service", "flag", "src_bytes", "dst_bytes",
-    "land", "wrong_fragment", "urgent", "hot", "num_failed_logins", "logged_in",
-    "num_compromised", "root_shell", "su_attempted", "num_root",
-    "num_file_creations", "num_shells", "num_access_files", "num_outbound_cmds",
-    "is_host_login", "is_guest_login", "count", "srv_count", "serror_rate",
-    "srv_serror_rate", "rerror_rate", "srv_rerror_rate", "same_srv_rate",
-    "diff_srv_rate", "srv_diff_host_rate", "dst_host_count", "dst_host_srv_count",
-    "dst_host_same_srv_rate", "dst_host_diff_srv_rate",
-    "dst_host_same_src_port_rate", "dst_host_srv_diff_host_rate",
-    "dst_host_serror_rate", "dst_host_srv_serror_rate", "dst_host_rerror_rate",
-    "dst_host_srv_rerror_rate", "label", "difficulty",
+    "duration",
+    "protocol_type",
+    "service",
+    "flag",
+    "src_bytes",
+    "dst_bytes",
+    "land",
+    "wrong_fragment",
+    "urgent",
+    "hot",
+    "num_failed_logins",
+    "logged_in",
+    "num_compromised",
+    "root_shell",
+    "su_attempted",
+    "num_root",
+    "num_file_creations",
+    "num_shells",
+    "num_access_files",
+    "num_outbound_cmds",
+    "is_host_login",
+    "is_guest_login",
+    "count",
+    "srv_count",
+    "serror_rate",
+    "srv_serror_rate",
+    "rerror_rate",
+    "srv_rerror_rate",
+    "same_srv_rate",
+    "diff_srv_rate",
+    "srv_diff_host_rate",
+    "dst_host_count",
+    "dst_host_srv_count",
+    "dst_host_same_srv_rate",
+    "dst_host_diff_srv_rate",
+    "dst_host_same_src_port_rate",
+    "dst_host_srv_diff_host_rate",
+    "dst_host_serror_rate",
+    "dst_host_srv_serror_rate",
+    "dst_host_rerror_rate",
+    "dst_host_srv_rerror_rate",
+    "label",
+    "difficulty",
 ]
 
 CATEGORICAL_FEATURES = ["protocol_type", "service", "flag"]
@@ -39,26 +71,53 @@ NUMERIC_FEATURES = [
 ATTACK_MAP: Dict[str, str] = {
     "normal": "NORMAL",
     # DoS
-    "back": "DoS", "land": "DoS", "neptune": "DoS", "pod": "DoS",
-    "smurf": "DoS", "teardrop": "DoS", "apache2": "DoS", "udpstorm": "DoS",
-    "processtable": "DoS", "worm": "DoS", "mailbomb": "DoS",
+    "back": "DoS",
+    "land": "DoS",
+    "neptune": "DoS",
+    "pod": "DoS",
+    "smurf": "DoS",
+    "teardrop": "DoS",
+    "apache2": "DoS",
+    "udpstorm": "DoS",
+    "processtable": "DoS",
+    "worm": "DoS",
+    "mailbomb": "DoS",
     # Probe
-    "ipsweep": "Probe", "nmap": "Probe", "portsweep": "Probe",
-    "satan": "Probe", "mscan": "Probe", "saint": "Probe",
+    "ipsweep": "Probe",
+    "nmap": "Probe",
+    "portsweep": "Probe",
+    "satan": "Probe",
+    "mscan": "Probe",
+    "saint": "Probe",
     # R2L
-    "ftp_write": "R2L", "guess_passwd": "R2L", "imap": "R2L",
-    "multihop": "R2L", "phf": "R2L", "spy": "R2L", "warezclient": "R2L",
-    "warezmaster": "R2L", "sendmail": "R2L", "named": "R2L",
-    "snmpattack": "R2L", "snmpguess": "R2L", "xlock": "R2L",
-    "xsnoop": "R2L", "httptunnel": "R2L",
+    "ftp_write": "R2L",
+    "guess_passwd": "R2L",
+    "imap": "R2L",
+    "multihop": "R2L",
+    "phf": "R2L",
+    "spy": "R2L",
+    "warezclient": "R2L",
+    "warezmaster": "R2L",
+    "sendmail": "R2L",
+    "named": "R2L",
+    "snmpattack": "R2L",
+    "snmpguess": "R2L",
+    "xlock": "R2L",
+    "xsnoop": "R2L",
+    "httptunnel": "R2L",
     # U2R
-    "buffer_overflow": "U2R", "loadmodule": "U2R", "perl": "U2R",
-    "rootkit": "U2R", "ps": "U2R", "sqlattack": "U2R", "xterm": "U2R",
+    "buffer_overflow": "U2R",
+    "loadmodule": "U2R",
+    "perl": "U2R",
+    "rootkit": "U2R",
+    "ps": "U2R",
+    "sqlattack": "U2R",
+    "xterm": "U2R",
 }
 
 NSL_KDD_URLS = {
     "train": "https://raw.githubusercontent.com/defcom17/NSL_KDD/master/KDDTrain+.txt",
-    "test":  "https://raw.githubusercontent.com/defcom17/NSL_KDD/master/KDDTest+.txt",
+    "test": "https://raw.githubusercontent.com/defcom17/NSL_KDD/master/KDDTest+.txt",
 }
 
 
@@ -129,14 +188,14 @@ class NSLKDDPreprocessor:
         return self.scaler.transform(X)
 
     # ── Public API ────────────────────────────────────────────────────────────
-    def fit_transform(
-        self, path: str
-    ) -> Tuple[np.ndarray, np.ndarray, pd.DataFrame]:
+    def fit_transform(self, path: str) -> Tuple[np.ndarray, np.ndarray, pd.DataFrame]:
         df = self._load_raw(path)
         df = self._encode_categoricals(df, fit=True)
         df = self._map_labels(df)
 
-        feature_cols = [c for c in df.columns if c not in ["label", "attack_category", "target"]]
+        feature_cols = [
+            c for c in df.columns if c not in ["label", "attack_category", "target"]
+        ]
         self.feature_names = feature_cols
         self.n_features = len(feature_cols)
 
@@ -145,9 +204,7 @@ class NSLKDDPreprocessor:
         self._fitted = True
         return X, y, df
 
-    def transform(
-        self, path: str
-    ) -> Tuple[np.ndarray, np.ndarray, pd.DataFrame]:
+    def transform(self, path: str) -> Tuple[np.ndarray, np.ndarray, pd.DataFrame]:
         assert self._fitted, "Call fit_transform first."
         df = self._load_raw(path)
         df = self._encode_categoricals(df, fit=False)
@@ -168,13 +225,16 @@ class NSLKDDPreprocessor:
         X_test, y_test, _ = self.transform(test_path)
 
         X_train, X_val, y_train, y_val = train_test_split(
-            X_train_full, y_train_full,
-            test_size=val_size, random_state=random_state, stratify=y_train_full,
+            X_train_full,
+            y_train_full,
+            test_size=val_size,
+            random_state=random_state,
+            stratify=y_train_full,
         )
         return {
             "train": (X_train, y_train),
-            "val":   (X_val, y_val),
-            "test":  (X_test, y_test),
+            "val": (X_val, y_val),
+            "test": (X_test, y_test),
         }
 
     # ── Persistence ───────────────────────────────────────────────────────────
