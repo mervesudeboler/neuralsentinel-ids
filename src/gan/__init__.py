@@ -1,2 +1,2 @@
-from .generator import Generator
-from .trainer import AdversarialTrainer
+from .generator import Generator  # noqa: F401
+from .trainer import AdversarialTrainer  # noqa: F401

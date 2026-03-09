@@ -1,1 +1,1 @@
-from .models import NeuralIDS, EnsembleIDS
+from .models import NeuralIDS, EnsembleIDS  # noqa: F401

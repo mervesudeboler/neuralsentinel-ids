@@ -130,7 +130,8 @@ def main():
             logger.info(f"  Pre-train epoch {ep}/{cfg['training']['pretrain_epochs']}")
     logger.info("IDS pre-training complete.")
 
-    # Pre-trained ağırlıkları kaydet — GAN training bunları bozacak, hardening öncesi geri yükleyeceğiz
+    # Pre-trained ağırlıkları kaydet — GAN training bunları bozacak,
+    # hardening öncesi geri yükleyeceğiz
     import copy
 
     pretrained_ids_weights = copy.deepcopy(neural_ids.state_dict())

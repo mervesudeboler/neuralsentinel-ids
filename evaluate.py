@@ -25,13 +25,13 @@ from sklearn.metrics import (
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import yaml
+import matplotlib.pyplot as plt  # noqa: E402
+import yaml  # noqa: E402
 
-from src.data.preprocessor import NSLKDDPreprocessor
-from src.ids.models import NeuralIDS
-from src.gan.generator import Generator
-from src.utils.logger import setup_logger
+from src.data.preprocessor import NSLKDDPreprocessor  # noqa: E402
+from src.ids.models import NeuralIDS  # noqa: E402
+from src.gan.generator import Generator  # noqa: E402
+from src.utils.logger import setup_logger  # noqa: E402
 
 logger = setup_logger("neuralsentinel.evaluate")
 
