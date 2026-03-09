@@ -6,7 +6,6 @@ The neural IDS shares its Discriminator role inside the GAN loop.
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.metrics import (

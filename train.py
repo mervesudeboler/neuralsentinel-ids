@@ -11,11 +11,9 @@ Usage:
 
 import argparse
 import os
-import sys
 import torch
 import torch.nn as nn
 import yaml
-import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import (
     f1_score, roc_auc_score, accuracy_score,

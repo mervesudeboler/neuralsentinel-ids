@@ -7,7 +7,7 @@ import os
 import urllib.request
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 from typing import Tuple, Dict, List
 import logging

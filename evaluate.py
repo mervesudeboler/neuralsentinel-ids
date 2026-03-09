@@ -16,10 +16,8 @@ import os
 import json
 import torch
 import numpy as np
-import pandas as pd
 from sklearn.metrics import (
     classification_report, confusion_matrix, roc_curve, auc,
-    precision_recall_curve,
 )
 import matplotlib
 matplotlib.use("Agg")

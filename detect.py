@@ -13,7 +13,6 @@ import time
 import os
 import random
 import torch
-import numpy as np
 import yaml
 
 from src.data.preprocessor import NSLKDDPreprocessor
